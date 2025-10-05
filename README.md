@@ -1,6 +1,6 @@
 # gasmaster
 
-A new Flutter project.
+A new Flutter project for an app to calculate and track gas mileage.
 
 ## Getting Started
 
