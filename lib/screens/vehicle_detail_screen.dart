@@ -75,12 +75,12 @@ class VehicleDetailScreen extends ConsumerWidget {
   Future<void> _deleteVehicle(BuildContext context, String id) async {
     final ok = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Delete vehicle?'),
         content: const Text('This will remove the vehicle and all fill-ups.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(_, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(_, true), child: const Text('Delete')),
+          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Delete')),
         ],
       ),
     );
@@ -139,12 +139,12 @@ class _FillUpTile extends StatelessWidget {
       confirmDismiss: (_) async {
         final ok = await showDialog<bool>(
           context: context,
-          builder: (_) => AlertDialog(
+          builder: (dialogContext) => AlertDialog(
             title: const Text('Delete fill-up?'),
             content: const Text('This entry will be permanently removed.'),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(_, false), child: const Text('Cancel')),
-              FilledButton(onPressed: () => Navigator.pop(_, true), child: const Text('Delete')),
+              TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancel')),
+              FilledButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Delete')),
             ],
           ),
         );
@@ -380,7 +380,7 @@ class _ConsumptionChart extends StatelessWidget {
                       ),
                     ),
                   ),
-                  gridData: FlGridData(show: true, drawVerticalLine: false),
+                  gridData: const FlGridData(show: true, drawVerticalLine: false),
                   borderData: FlBorderData(show: false),
                   lineBarsData: [
                     LineChartBarData(
