@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
+import '../models/vehicle.dart';
 import '../services/local_repository.dart';
 import '../state/app_state.dart';
+import '../utils/csv_export.dart';
 import '../utils/stats.dart';
 
 class VehicleDetailScreen extends ConsumerWidget {
@@ -28,6 +30,11 @@ class VehicleDetailScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(v.displayName),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.file_download_outlined),
+            onPressed: () => _exportCsv(context, v, stats),
+            tooltip: 'Export CSV',
+          ),
           if (hasFillUps)
             IconButton(
               icon: const Icon(Icons.ios_share),
@@ -87,6 +94,22 @@ class VehicleDetailScreen extends ConsumerWidget {
     if (ok == true) {
       await LocalRepository.deleteVehicle(id);
       if (context.mounted) context.go('/');
+    }
+  }
+
+  Future<void> _exportCsv(BuildContext context, Vehicle v, VehicleStats stats) async {
+    if (stats.rows.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nothing to export')),
+      );
+      return;
+    }
+    final csv = generateFillUpsCsv([(vehicle: v, stats: stats)]);
+    await shareCsv(csv, vehicleExportFilename(v));
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Export ready')),
+      );
     }
   }
 

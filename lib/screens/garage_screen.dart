@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../models/vehicle.dart';
 import '../services/local_repository.dart';
 import '../state/app_state.dart';
+import '../utils/csv_export.dart';
 import '../utils/stats.dart';
 import '../utils/vehicle_color.dart';
 
@@ -16,6 +18,14 @@ class GarageScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('GasMaster'),
         centerTitle: false,
+        actions: [
+          if (vehicles.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.file_download_outlined),
+              onPressed: () => _exportFleet(context),
+              tooltip: 'Export all vehicles',
+            ),
+        ],
       ),
       floatingActionButton: vehicles.isEmpty
           ? null
@@ -47,6 +57,29 @@ class GarageScreen extends ConsumerWidget {
               },
             ),
     );
+  }
+
+  Future<void> _exportFleet(BuildContext context) async {
+    final entries = <({Vehicle vehicle, VehicleStats stats})>[];
+    for (final v in LocalRepository.allVehicles()) {
+      final stats = LocalRepository.vehicleStats(v.id);
+      if (stats.rows.isNotEmpty) {
+        entries.add((vehicle: v, stats: stats));
+      }
+    }
+    if (entries.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nothing to export')),
+      );
+      return;
+    }
+    final csv = generateFillUpsCsv(entries);
+    await shareCsv(csv, fleetExportFilename());
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Export ready')),
+      );
+    }
   }
 
   String _vehicleSubtitle(VehicleStats stats) {
