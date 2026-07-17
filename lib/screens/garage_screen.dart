@@ -7,6 +7,7 @@ import '../state/app_state.dart';
 import '../utils/csv_export.dart';
 import '../utils/stats.dart';
 import '../utils/vehicle_color.dart';
+import '../widgets/gasmaster_brand.dart';
 
 class GarageScreen extends ConsumerWidget {
   const GarageScreen({super.key});
@@ -16,7 +17,7 @@ class GarageScreen extends ConsumerWidget {
     final vehicles = ref.watch(vehiclesProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('GasMaster'),
+        title: const GasMasterAppBarTitle(),
         centerTitle: false,
         actions: [
           if (vehicles.isNotEmpty)
@@ -109,6 +110,11 @@ class _EmptyGarage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const Opacity(
+              opacity: 0.85,
+              child: GasMasterBrand(compact: false),
+            ),
+            const SizedBox(height: 32),
             Icon(Icons.garage_outlined, size: 72, color: theme.colorScheme.primary.withValues(alpha: 0.5)),
             const SizedBox(height: 24),
             Text('No vehicles yet', style: theme.textTheme.headlineSmall),

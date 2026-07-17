@@ -9,6 +9,7 @@ import '../services/local_repository.dart';
 import '../state/app_state.dart';
 import '../utils/csv_export.dart';
 import '../utils/stats.dart';
+import '../widgets/gasmaster_brand.dart';
 
 class VehicleDetailScreen extends ConsumerWidget {
   final String vehicleId;
@@ -20,7 +21,13 @@ class VehicleDetailScreen extends ConsumerWidget {
     final stats = ref.watch(statsProvider(vehicleId));
 
     if (v == null) {
-      return Scaffold(appBar: AppBar(), body: const Center(child: Text('Vehicle not found')));
+      return Scaffold(
+        appBar: AppBar(
+          title: const GasMasterAppBarTitle(subtitle: 'Vehicle not found'),
+          centerTitle: false,
+        ),
+        body: const Center(child: Text('Vehicle not found')),
+      );
     }
 
     final isMetric = stats.runningAvgLPer100 != null;
@@ -28,7 +35,8 @@ class VehicleDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(v.displayName),
+        title: GasMasterAppBarTitle(subtitle: v.displayName),
+        centerTitle: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.file_download_outlined),

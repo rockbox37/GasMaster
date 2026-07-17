@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../models/fillup.dart';
 import '../services/local_repository.dart';
 import '../state/app_state.dart';
+import '../widgets/gasmaster_brand.dart';
 
 class AddFillUpScreen extends ConsumerStatefulWidget {
   final String vehicleId;
@@ -118,7 +119,12 @@ class _AddFillUpScreenState extends ConsumerState<AddFillUpScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text(_isEditing ? 'Edit Fill-up' : 'Add Fill-up')),
+      appBar: AppBar(
+        title: GasMasterAppBarTitle(
+          subtitle: _isEditing ? 'Edit Fill-up' : 'Add Fill-up',
+        ),
+        centerTitle: false,
+      ),
       body: Form(
         key: _formKey,
         autovalidateMode: AutovalidateMode.onUserInteraction,

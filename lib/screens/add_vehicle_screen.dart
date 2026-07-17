@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/local_repository.dart';
+import '../widgets/gasmaster_brand.dart';
 
 class AddVehicleScreen extends ConsumerStatefulWidget {
   const AddVehicleScreen({super.key});
@@ -29,7 +30,10 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Vehicle')),
+      appBar: AppBar(
+        title: const GasMasterAppBarTitle(subtitle: 'Add Vehicle'),
+        centerTitle: false,
+      ),
       body: Form(
         key: _formKey,
         autovalidateMode: AutovalidateMode.onUserInteraction,
