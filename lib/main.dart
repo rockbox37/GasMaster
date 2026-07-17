@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -12,7 +13,9 @@ import 'services/local_repository.dart';
 import 'services/preferences.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
   await Hive.initFlutter();
   Hive.registerAdapter(VehicleAdapter());
   Hive.registerAdapter(FillUpAdapter());
@@ -20,6 +23,10 @@ void main() async {
   await Preferences.init();
 
   runApp(const ProviderScope(child: GasMasterApp()));
+
+  // Hold the native splash a bit longer so the logo is visible.
+  await Future<void>.delayed(const Duration(milliseconds: 500));
+  FlutterNativeSplash.remove();
 }
 
 final _router = GoRouter(

@@ -20,6 +20,7 @@ dependencies:
   shared_preferences: ^2.3.2
   share_plus: ^10.0.0
   path_provider: ^2.1.4
+  flutter_native_splash: ^2.4.7
   # Optional (uncomment after flutterfire configure)
   # firebase_core: ^3.6.0
   # firebase_auth: ^5.3.0
@@ -39,6 +40,20 @@ flutter_launcher_icons:
   image_path: assets/branding/icon.png
   adaptive_icon_background: "#000000"
   adaptive_icon_foreground: assets/branding/icon.png
+
+flutter_native_splash:
+  color: "#000000"
+  color_dark: "#000000"
+  image: assets/branding/logo.png
+  image_dark: assets/branding/logo.png
+  android: true
+  ios: true
+  web: false
+  android_12:
+    color: "#000000"
+    color_dark: "#000000"
+    image: assets/branding/logo.png
+    image_dark: assets/branding/logo.png
 
 flutter:
   uses-material-design: true
