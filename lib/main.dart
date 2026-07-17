@@ -22,6 +22,9 @@ void main() async {
   await LocalRepository.bootstrap();
   await Preferences.init();
 
+  // Seed a backup if data exists but no snapshot yet (first launch after upgrade).
+  await LocalRepository.persistNow();
+
   runApp(const ProviderScope(child: GasMasterApp()));
 
   // Hold the native splash a bit longer so the logo is visible.
@@ -51,8 +54,34 @@ final _router = GoRouter(
   ],
 );
 
-class GasMasterApp extends ConsumerWidget {
+class GasMasterApp extends ConsumerStatefulWidget {
   const GasMasterApp({super.key});
+
+  @override
+  ConsumerState<GasMasterApp> createState() => _GasMasterAppState();
+}
+
+class _GasMasterAppState extends ConsumerState<GasMasterApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.detached) {
+      LocalRepository.persistNow();
+    }
+  }
 
   static ThemeData _theme(Brightness brightness) {
     return ThemeData(
@@ -67,7 +96,7 @@ class GasMasterApp extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'GasMaster',
       theme: _theme(Brightness.light),

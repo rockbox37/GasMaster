@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../models/vehicle.dart';
 import '../models/fillup.dart';
 import '../utils/stats.dart';
+import 'backup_service.dart';
 
 typedef RepositoryListener = void Function();
 
@@ -15,9 +16,13 @@ class LocalRepository {
   static final _vehicleListeners = <RepositoryListener>{};
   static final _fillupListeners = <RepositoryListener>{};
 
+  static Future<void>? _backupInFlight;
+  static Timer? _backupDebounce;
+
   static Future<void> bootstrap() async {
     await Hive.openBox<Vehicle>(_vehicles);
     await Hive.openBox<FillUp>(_fillups);
+    await BackupService.restoreIfNeeded();
   }
 
   static Box<Vehicle> get vehicleBox => Hive.box<Vehicle>(_vehicles);
@@ -55,6 +60,33 @@ class LocalRepository {
     });
   }
 
+  static Future<void> _persistVehicles() async {
+    await vehicleBox.flush();
+    _scheduleBackup();
+  }
+
+  static Future<void> _persistFillUps() async {
+    await fillupBox.flush();
+    _scheduleBackup();
+  }
+
+  /// Debounced JSON backup so rapid edits don't thrash disk.
+  static void _scheduleBackup() {
+    _backupDebounce?.cancel();
+    _backupDebounce = Timer(const Duration(milliseconds: 300), () {
+      persistNow();
+    });
+  }
+
+  /// Flush Hive and write the JSON backup immediately.
+  static Future<void> persistNow() async {
+    _backupDebounce?.cancel();
+    if (Hive.isBoxOpen(_vehicles)) await vehicleBox.flush();
+    if (Hive.isBoxOpen(_fillups)) await fillupBox.flush();
+    _backupInFlight = BackupService.writeBackup();
+    await _backupInFlight;
+  }
+
   // Vehicles
   static Future<String> addVehicle({
     required String color,
@@ -66,6 +98,7 @@ class LocalRepository {
     final id = const Uuid().v4();
     final v = Vehicle(id: id, color: color, year: year, make: make, model: model, trim: trim);
     await vehicleBox.put(id, v);
+    await _persistVehicles();
     _notifyVehicleListeners();
     return id;
   }
@@ -74,6 +107,8 @@ class LocalRepository {
     final toDelete = fillupBox.values.where((f) => f.vehicleId == id).map((f) => f.key).toList();
     await fillupBox.deleteAll(toDelete);
     await vehicleBox.delete(id);
+    await _persistVehicles();
+    await _persistFillUps();
     _notifyVehicleListeners();
     _notifyFillUpListeners();
   }
@@ -100,6 +135,7 @@ class LocalRepository {
       isFullTank: isFullTank,
     );
     await fillupBox.put(id, f);
+    await _persistFillUps();
     _notifyFillUpListeners();
   }
 
@@ -124,11 +160,13 @@ class LocalRepository {
       ..unitSystem = unitSystem
       ..isFullTank = isFullTank;
     await existing.save();
+    await _persistFillUps();
     _notifyFillUpListeners();
   }
 
   static Future<void> deleteFillUp(String id) async {
     await fillupBox.delete(id);
+    await _persistFillUps();
     _notifyFillUpListeners();
   }
 

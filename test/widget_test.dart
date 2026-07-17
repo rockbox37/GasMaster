@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gasmaster/models/fillup.dart';
 import 'package:gasmaster/models/vehicle.dart';
 import 'package:gasmaster/screens/garage_screen.dart';
+import 'package:gasmaster/services/backup_service.dart';
 import 'package:gasmaster/services/local_repository.dart';
 import 'package:gasmaster/services/preferences.dart';
 import 'package:gasmaster/state/app_state.dart';
@@ -18,6 +19,7 @@ void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     tempDir = await Directory.systemTemp.createTemp('gasmaster_test_');
+    BackupService.documentsOverride = Directory('${tempDir.path}/docs')..createSync();
     Hive.init(tempDir.path);
     if (!Hive.isAdapterRegistered(1)) Hive.registerAdapter(VehicleAdapter());
     if (!Hive.isAdapterRegistered(2)) Hive.registerAdapter(FillUpAdapter());
@@ -28,6 +30,7 @@ void main() {
   });
 
   tearDown(() async {
+    BackupService.documentsOverride = null;
     await Hive.close();
     if (tempDir.existsSync()) {
       await tempDir.delete(recursive: true);
