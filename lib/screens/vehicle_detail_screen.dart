@@ -10,6 +10,7 @@ import '../state/app_state.dart';
 import '../utils/csv_export.dart';
 import '../utils/stats.dart';
 import '../widgets/gasmaster_brand.dart';
+import '../widgets/vehicle_photo_picker.dart';
 
 class VehicleDetailScreen extends ConsumerWidget {
   final String vehicleId;
@@ -17,7 +18,15 @@ class VehicleDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final v = LocalRepository.vehicleBox.get(vehicleId);
+    final vehicles = ref.watch(vehiclesProvider);
+    Vehicle? v;
+    for (final candidate in vehicles) {
+      if (candidate.id == vehicleId) {
+        v = candidate;
+        break;
+      }
+    }
+    v ??= LocalRepository.vehicleBox.get(vehicleId);
     final stats = ref.watch(statsProvider(vehicleId));
 
     if (v == null) {
@@ -32,21 +41,23 @@ class VehicleDetailScreen extends ConsumerWidget {
 
     final isMetric = stats.runningAvgLPer100 != null;
     final hasFillUps = stats.rows.isNotEmpty;
+    final vehicle = v;
 
     return Scaffold(
       appBar: AppBar(
-        title: GasMasterAppBarTitle(subtitle: v.displayName),
+        title: GasMasterAppBarTitle(subtitle: vehicle.displayName),
         centerTitle: false,
+        titleSpacing: 8,
         actions: [
           IconButton(
             icon: const Icon(Icons.file_download_outlined),
-            onPressed: () => _exportCsv(context, v, stats),
+            onPressed: () => _exportCsv(context, vehicle, stats),
             tooltip: 'Export CSV',
           ),
           if (hasFillUps)
             IconButton(
               icon: const Icon(Icons.ios_share),
-              onPressed: () => _shareStats(context, v.displayName, stats, isMetric),
+              onPressed: () => _shareStats(context, vehicle.displayName, stats, isMetric),
               tooltip: 'Share summary',
             ),
           IconButton(
@@ -65,7 +76,9 @@ class VehicleDetailScreen extends ConsumerWidget {
           ? ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                _StatHeader(stats: stats),
+                _VehiclePhotoSection(vehicle: vehicle),
+                const SizedBox(height: 16),
+                _StatHeader(stats: stats, vehicleName: vehicle.displayName),
                 const SizedBox(height: 16),
                 _ConsumptionChart(stats: stats),
                 const SizedBox(height: 16),
@@ -81,8 +94,15 @@ class VehicleDetailScreen extends ConsumerWidget {
                 _AggList(stats: stats, isMetric: isMetric),
               ],
             )
-          : _EmptyFillUps(
-              onAdd: () => context.push('/vehicle/$vehicleId/fillup/add'),
+          : ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                _VehiclePhotoSection(vehicle: vehicle),
+                const SizedBox(height: 24),
+                _EmptyFillUps(
+                  onAdd: () => context.push('/vehicle/$vehicleId/fillup/add'),
+                ),
+              ],
             ),
     );
   }
@@ -143,6 +163,38 @@ class VehicleDetailScreen extends ConsumerWidget {
     }
 
     await Share.share(msg.toString(), subject: 'GasMaster — $name');
+  }
+}
+
+class _VehiclePhotoSection extends StatelessWidget {
+  final Vehicle vehicle;
+  const _VehiclePhotoSection({required this.vehicle});
+
+  @override
+  Widget build(BuildContext context) {
+    return VehiclePhotoPicker(
+      key: ValueKey('photo-${vehicle.id}-${vehicle.photoPath}'),
+      existingRelativePath: vehicle.photoPath,
+      onOptimized: (result) async {
+        await LocalRepository.setVehiclePhoto(
+          vehicleId: vehicle.id,
+          optimized: result,
+        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Photo saved · ${result.savingsSummary}')),
+          );
+        }
+      },
+      onRemoved: () async {
+        await LocalRepository.clearVehiclePhoto(vehicle.id);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Photo removed')),
+          );
+        }
+      },
+    );
   }
 }
 
@@ -231,30 +283,28 @@ class _EmptyFillUps extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.local_gas_station_outlined,
-                size: 72, color: theme.colorScheme.primary.withValues(alpha: 0.5)),
-            const SizedBox(height: 24),
-            Text('No fill-ups yet', style: theme.textTheme.headlineSmall),
-            const SizedBox(height: 8),
-            Text(
-              'Log your first fill-up to start tracking fuel economy.',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-            ),
-            const SizedBox(height: 24),
-            FilledButton.icon(
-              onPressed: onAdd,
-              icon: const Icon(Icons.local_gas_station),
-              label: const Text('Add Fill-up'),
-            ),
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.local_gas_station_outlined,
+              size: 72, color: theme.colorScheme.primary.withValues(alpha: 0.5)),
+          const SizedBox(height: 24),
+          Text('No fill-ups yet', style: theme.textTheme.headlineSmall),
+          const SizedBox(height: 8),
+          Text(
+            'Log your first fill-up to start tracking fuel economy.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 24),
+          FilledButton.icon(
+            onPressed: onAdd,
+            icon: const Icon(Icons.local_gas_station),
+            label: const Text('Add Fill-up'),
+          ),
+        ],
       ),
     );
   }
@@ -262,13 +312,15 @@ class _EmptyFillUps extends StatelessWidget {
 
 class _StatHeader extends StatelessWidget {
   final VehicleStats stats;
-  const _StatHeader({required this.stats});
+  final String vehicleName;
+  const _StatHeader({required this.stats, required this.vehicleName});
 
   @override
   Widget build(BuildContext context) {
     final isMetric = stats.runningAvgLPer100 != null;
     final distUnit = isMetric ? 'km' : 'mi';
     final costPerDist = stats.totalMiles > 0 ? stats.totalCost / stats.totalMiles : null;
+    final theme = Theme.of(context);
 
     return Card(
       child: Padding(
@@ -276,7 +328,13 @@ class _StatHeader extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Summary', style: Theme.of(context).textTheme.titleMedium),
+            Text('Summary', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 4),
+            Text(
+              vehicleName,
+              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+              softWrap: true,
+            ),
             const SizedBox(height: 12),
             Wrap(
               spacing: 12,

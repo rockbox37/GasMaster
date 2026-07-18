@@ -6,8 +6,8 @@ import '../services/local_repository.dart';
 import '../state/app_state.dart';
 import '../utils/csv_export.dart';
 import '../utils/stats.dart';
-import '../utils/vehicle_color.dart';
 import '../widgets/gasmaster_brand.dart';
+import '../widgets/vehicle_avatar.dart';
 
 class GarageScreen extends ConsumerWidget {
   const GarageScreen({super.key});
@@ -26,6 +26,18 @@ class GarageScreen extends ConsumerWidget {
               onPressed: () => _exportFleet(context),
               tooltip: 'Export all vehicles',
             ),
+          PopupMenuButton<String>(
+            tooltip: 'More',
+            onSelected: (value) {
+              if (value == 'about') context.push('/about');
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem(
+                value: 'about',
+                child: Text('About'),
+              ),
+            ],
+          ),
         ],
       ),
       floatingActionButton: vehicles.isEmpty
@@ -37,25 +49,35 @@ class GarageScreen extends ConsumerWidget {
             ),
       body: vehicles.isEmpty
           ? _EmptyGarage(onAdd: () => context.push('/vehicle/add'))
-          : ListView.separated(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              itemCount: vehicles.length,
-              separatorBuilder: (_, __) => const Divider(height: 1, indent: 72),
-              itemBuilder: (_, i) {
-                final v = vehicles[i];
-                final stats = LocalRepository.vehicleStats(v.id);
-                return ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  leading: CircleAvatar(
-                    backgroundColor: parseVehicleColor(v.color),
-                    child: const Icon(Icons.directions_car, color: Colors.white, size: 20),
-                  ),
-                  title: Text(v.displayName, style: const TextStyle(fontWeight: FontWeight.w500)),
-                  subtitle: Text(_vehicleSubtitle(stats)),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push('/vehicle/${v.id}'),
-                );
-              },
+          : Stack(
+              fit: StackFit.expand,
+              children: [
+                const GasMasterWatermark(),
+                ListView.separated(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  itemCount: vehicles.length,
+                  separatorBuilder: (_, __) =>
+                      const Divider(height: 1, indent: 72),
+                  itemBuilder: (_, i) {
+                    final v = vehicles[i];
+                    final stats = LocalRepository.vehicleStats(v.id);
+                    return ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
+                      leading: VehicleAvatar(vehicle: v, radius: 22),
+                      title: Text(
+                        v.displayName,
+                        style: const TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                      subtitle: Text(_vehicleSubtitle(stats)),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.push('/vehicle/${v.id}'),
+                    );
+                  },
+                ),
+              ],
             ),
     );
   }

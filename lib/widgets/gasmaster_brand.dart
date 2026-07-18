@@ -54,6 +54,32 @@ class GasMasterBrand extends StatelessWidget {
   }
 }
 
+/// Faded logo for use behind scrollable content (e.g. garage vehicle list).
+class GasMasterWatermark extends StatelessWidget {
+  const GasMasterWatermark({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final opacity = isDark ? 0.10 : 0.07;
+
+    return IgnorePointer(
+      child: Center(
+        child: Opacity(
+          opacity: opacity,
+          child: Image.asset(
+            GasMasterBrandAssets.logo,
+            width: 280,
+            height: 280,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.medium,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// AppBar title with brand row and optional screen subtitle below.
 class GasMasterAppBarTitle extends StatelessWidget {
   final String? subtitle;
@@ -77,20 +103,26 @@ class GasMasterAppBarTitle extends StatelessWidget {
     }
 
     final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        brand,
-        Text(
-          subtitle!,
-          style: theme.textTheme.titleSmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+    // Expand to the AppBar title slot width so the subtitle isn't capped
+    // by the intrinsic width of the brand wordmark image.
+    return SizedBox(
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          brand,
+          Text(
+            subtitle!,
+            style: theme.textTheme.titleSmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            maxLines: 2,
+            softWrap: true,
+            overflow: TextOverflow.ellipsis,
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

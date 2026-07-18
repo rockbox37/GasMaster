@@ -9,6 +9,8 @@ class Vehicle extends HiveObject {
   @HiveField(3) String make;
   @HiveField(4) String model;
   @HiveField(5) String trim;
+  /// Relative path under app documents, e.g. `vehicle_photos/{id}.jpg`.
+  @HiveField(6) String? photoPath;
 
   Vehicle({
     required this.id,
@@ -17,7 +19,11 @@ class Vehicle extends HiveObject {
     required this.make,
     required this.model,
     required this.trim,
+    this.photoPath,
   });
 
-  String get displayName => '$year $make $model ${trim.isNotEmpty ? "($trim)" : ""}';
+  String get displayName {
+    final base = '$year $make $model';
+    return trim.isNotEmpty ? '$base ($trim)' : base;
+  }
 }

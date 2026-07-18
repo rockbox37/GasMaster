@@ -33,6 +33,7 @@ class BackupService {
               'make': v.make,
               'model': v.model,
               'trim': v.trim,
+              'photoPath': v.photoPath,
             })
         .toList();
 
@@ -105,6 +106,7 @@ class BackupService {
         make: m['make'] as String? ?? '',
         model: m['model'] as String? ?? '',
         trim: m['trim'] as String? ?? '',
+        photoPath: m['photoPath'] as String?,
       );
       await LocalRepository.vehicleBox.put(v.id, v);
     }

@@ -47,5 +47,11 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>GasMaster needs photo library access to set a vehicle photo.</string>
+		<key>NSCameraUsageDescription</key>
+		<string>GasMaster needs camera access to take a vehicle photo.</string>
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>GasMaster may save optimized vehicle photos to your library only if you choose to export them.</string>
 	</dict>
 </plist>

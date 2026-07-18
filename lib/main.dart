@@ -6,6 +6,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'models/vehicle.dart';
 import 'models/fillup.dart';
 import 'screens/garage_screen.dart';
+import 'screens/about_screen.dart';
 import 'screens/add_vehicle_screen.dart';
 import 'screens/add_fillup_screen.dart';
 import 'screens/vehicle_detail_screen.dart';
@@ -35,6 +36,7 @@ void main() async {
 final _router = GoRouter(
   routes: [
     GoRoute(path: '/', builder: (_, __) => const GarageScreen()),
+    GoRoute(path: '/about', builder: (_, __) => const AboutScreen()),
     GoRoute(path: '/vehicle/add', builder: (_, __) => const AddVehicleScreen()),
     GoRoute(
       path: '/vehicle/:id',

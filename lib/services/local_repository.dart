@@ -6,6 +6,7 @@ import '../models/vehicle.dart';
 import '../models/fillup.dart';
 import '../utils/stats.dart';
 import 'backup_service.dart';
+import 'vehicle_photo_service.dart';
 
 typedef RepositoryListener = void Function();
 
@@ -94,16 +95,54 @@ class LocalRepository {
     required String make,
     required String model,
     required String trim,
+    String? photoPath,
   }) async {
     final id = const Uuid().v4();
-    final v = Vehicle(id: id, color: color, year: year, make: make, model: model, trim: trim);
+    final v = Vehicle(
+      id: id,
+      color: color,
+      year: year,
+      make: make,
+      model: model,
+      trim: trim,
+      photoPath: photoPath,
+    );
     await vehicleBox.put(id, v);
     await _persistVehicles();
     _notifyVehicleListeners();
     return id;
   }
 
+  static Future<ImageOptimizationResult?> setVehiclePhoto({
+    required String vehicleId,
+    required ImageOptimizationResult optimized,
+  }) async {
+    final v = vehicleBox.get(vehicleId);
+    if (v == null) return null;
+    final saved = await VehiclePhotoService.saveOptimizedBytes(
+      vehicleId: vehicleId,
+      result: optimized,
+    );
+    v.photoPath = saved.relativePath;
+    await v.save();
+    await _persistVehicles();
+    _notifyVehicleListeners();
+    return saved.result;
+  }
+
+  static Future<void> clearVehiclePhoto(String vehicleId) async {
+    final v = vehicleBox.get(vehicleId);
+    if (v == null) return;
+    await VehiclePhotoService.deletePhoto(v.photoPath);
+    v.photoPath = null;
+    await v.save();
+    await _persistVehicles();
+    _notifyVehicleListeners();
+  }
+
   static Future<void> deleteVehicle(String id) async {
+    final existing = vehicleBox.get(id);
+    await VehiclePhotoService.deletePhoto(existing?.photoPath);
     final toDelete = fillupBox.values.where((f) => f.vehicleId == id).map((f) => f.key).toList();
     await fillupBox.deleteAll(toDelete);
     await vehicleBox.delete(id);

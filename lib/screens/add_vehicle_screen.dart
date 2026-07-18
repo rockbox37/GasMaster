@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/local_repository.dart';
+import '../services/vehicle_photo_service.dart';
 import '../widgets/gasmaster_brand.dart';
+import '../widgets/vehicle_photo_picker.dart';
 
 class AddVehicleScreen extends ConsumerStatefulWidget {
   const AddVehicleScreen({super.key});
@@ -11,11 +13,13 @@ class AddVehicleScreen extends ConsumerStatefulWidget {
 
 class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _photoKey = GlobalKey<VehiclePhotoPickerState>();
   final _color = TextEditingController();
   final _year = TextEditingController();
   final _make = TextEditingController();
   final _model = TextEditingController();
   final _trim = TextEditingController();
+  ImageOptimizationResult? _photoResult;
 
   @override
   void dispose() {
@@ -40,6 +44,12 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            VehiclePhotoPicker(
+              key: _photoKey,
+              onOptimized: (r) => setState(() => _photoResult = r),
+              onRemoved: () => setState(() => _photoResult = null),
+            ),
+            const SizedBox(height: 20),
             TextFormField(
               controller: _year,
               decoration: const InputDecoration(labelText: 'Year'),
@@ -95,16 +105,28 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-    await LocalRepository.addVehicle(
+    final id = await LocalRepository.addVehicle(
       color: _color.text.trim(),
       year: int.parse(_year.text.trim()),
       make: _make.text.trim(),
       model: _model.text.trim(),
       trim: _trim.text.trim(),
     );
+
+    String? savings;
+    final photo = _photoResult ?? _photoKey.currentState?.lastResult;
+    if (photo != null) {
+      await LocalRepository.setVehiclePhoto(vehicleId: id, optimized: photo);
+      savings = photo.savingsSummary;
+    }
+
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Vehicle added')),
+      SnackBar(
+        content: Text(
+          savings != null ? 'Vehicle added · $savings' : 'Vehicle added',
+        ),
+      ),
     );
     Navigator.pop(context);
   }

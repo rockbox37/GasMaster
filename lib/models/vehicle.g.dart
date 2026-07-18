@@ -19,18 +19,20 @@ class VehicleAdapter extends TypeAdapter<Vehicle> {
       make: fields[3] as String,
       model: fields[4] as String,
       trim: fields[5] as String,
+      photoPath: fields[6] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Vehicle obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)..write(obj.id)
       ..writeByte(1)..write(obj.color)
       ..writeByte(2)..write(obj.year)
       ..writeByte(3)..write(obj.make)
       ..writeByte(4)..write(obj.model)
-      ..writeByte(5)..write(obj.trim);
+      ..writeByte(5)..write(obj.trim)
+      ..writeByte(6)..write(obj.photoPath);
   }
 }
