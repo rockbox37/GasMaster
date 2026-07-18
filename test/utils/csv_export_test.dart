@@ -72,8 +72,8 @@ void main() {
       final lines = csv.trim().split('\n');
 
       expect(lines.length, 3);
-      expect(lines[1], 'veh-1,2020 Honda Civic ,2024-06-01,10000.0,10.0,42.5,imperial,true,,');
-      expect(lines[2], 'veh-1,2020 Honda Civic ,2024-06-15,10300.0,10.0,42.5,imperial,true,30.00,');
+      expect(lines[1], 'veh-1,2020 Honda Civic,2024-06-01,10000.0,10.0,42.5,imperial,true,,');
+      expect(lines[2], 'veh-1,2020 Honda Civic,2024-06-15,10300.0,10.0,42.5,imperial,true,30.00,');
     });
 
     test('escapes commas and quotes in vehicle names', () {
@@ -85,7 +85,7 @@ void main() {
 
       expect(
         lines[1],
-        'veh-1,"2020 Ford, Inc. F-150 ""Raptor"" ",2024-06-15,5000.0,20.0,42.5,imperial,true,,',
+        'veh-1,"2020 Ford, Inc. F-150 ""Raptor""",2024-06-15,5000.0,20.0,42.5,imperial,true,,',
       );
     });
 
