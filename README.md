@@ -83,6 +83,10 @@ assets/branding/            # Logo & app icon
 test/                       # Unit / service tests
 ```
 
+## Contributing
+
+Work on a feature branch and open a pull request into `main`. CI runs `flutter analyze` and `flutter test` on every PR; keep those green before merging.
+
 ## Privacy
 
 GasMaster does not upload your garage to the cloud. Data is stored locally on the device (Hive), with a JSON backup written for restore resilience.
