@@ -118,9 +118,9 @@ void main() {
       ];
       final stats = VehicleStats.fromFillUps(fills);
 
-      final mpg2 = 100 / 5; // 20 mpg
-      final mpg3 = 200 / 15; // ~13.33 mpg
-      final simpleAvg = (mpg2 + mpg3) / 2;
+      const mpg2 = 100 / 5; // 20 mpg
+      const mpg3 = 200 / 15; // ~13.33 mpg
+      const simpleAvg = (mpg2 + mpg3) / 2;
 
       expect(stats.rows[1].mpg, closeTo(mpg2, 0.01));
       expect(stats.rows[2].mpg, closeTo(mpg3, 0.01));
