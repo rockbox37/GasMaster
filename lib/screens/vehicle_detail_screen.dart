@@ -50,11 +50,6 @@ class VehicleDetailScreen extends ConsumerWidget {
         centerTitle: false,
         titleSpacing: 8,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.file_download_outlined),
-            onPressed: () => _exportCsv(context, vehicle, stats),
-            tooltip: 'Export CSV',
-          ),
           if (hasFillUps)
             IconButton(
               icon: const Icon(Icons.ios_share),
@@ -66,16 +61,23 @@ class VehicleDetailScreen extends ConsumerWidget {
             onSelected: (value) {
               if (value == 'export-backup') {
                 exportVehicleBackup(context, vehicle);
+              } else if (value == 'export-csv') {
+                _exportCsv(context, vehicle, stats);
               } else if (value == 'delete') {
                 _deleteVehicle(context, vehicleId);
               }
             },
-            itemBuilder: (context) => const [
-              PopupMenuItem(
+            itemBuilder: (context) => [
+              const PopupMenuItem(
                 value: 'export-backup',
                 child: Text('Export backup'),
               ),
-              PopupMenuItem(
+              if (hasFillUps)
+                const PopupMenuItem(
+                  value: 'export-csv',
+                  child: Text('Export CSV'),
+                ),
+              const PopupMenuItem(
                 value: 'delete',
                 child: Text('Delete vehicle'),
               ),
@@ -144,7 +146,7 @@ class VehicleDetailScreen extends ConsumerWidget {
   Future<void> _exportCsv(BuildContext context, Vehicle v, VehicleStats stats) async {
     if (stats.rows.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nothing to export')),
+        const SnackBar(content: Text('No fill-ups to export as CSV')),
       );
       return;
     }
@@ -152,7 +154,9 @@ class VehicleDetailScreen extends ConsumerWidget {
     await shareCsv(csv, vehicleExportFilename(v));
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Export ready')),
+        const SnackBar(
+          content: Text('CSV ready — save or share from the share sheet'),
+        ),
       );
     }
   }

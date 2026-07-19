@@ -39,7 +39,9 @@ Future<void> exportFleetBackup(BuildContext context) async {
   if (context.mounted) {
     _snack(
       context,
-      hasPhotos ? 'Backup ready — photos not included' : 'Backup ready',
+      hasPhotos
+          ? 'Backup ready — save to Files from the share sheet (photos not included)'
+          : 'Backup ready — save to Files from the share sheet',
     );
   }
 }
@@ -72,7 +74,9 @@ Future<void> exportVehicleBackup(BuildContext context, Vehicle vehicle) async {
   if (context.mounted) {
     _snack(
       context,
-      hasPhotos ? 'Backup ready — photos not included' : 'Backup ready',
+      hasPhotos
+          ? 'Backup ready — save to Files from the share sheet (photos not included)'
+          : 'Backup ready — save to Files from the share sheet',
     );
   }
 }
