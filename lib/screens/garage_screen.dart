@@ -21,17 +21,13 @@ class GarageScreen extends ConsumerWidget {
         title: const GasMasterAppBarTitle(),
         centerTitle: false,
         actions: [
-          if (vehicles.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.file_download_outlined),
-              onPressed: () => _exportFleet(context),
-              tooltip: 'Export all vehicles',
-            ),
           PopupMenuButton<String>(
             tooltip: 'More',
             onSelected: (value) {
               if (value == 'export-backup') {
                 exportFleetBackup(context);
+              } else if (value == 'export-csv') {
+                _exportFleetCsv(context);
               } else if (value == 'import-backup') {
                 importBackupFlow(
                   context,
@@ -48,6 +44,11 @@ class GarageScreen extends ConsumerWidget {
                 const PopupMenuItem(
                   value: 'export-backup',
                   child: Text('Export backup'),
+                ),
+              if (vehicles.isNotEmpty)
+                const PopupMenuItem(
+                  value: 'export-csv',
+                  child: Text('Export CSV'),
                 ),
               const PopupMenuItem(
                 value: 'import-backup',
@@ -107,7 +108,7 @@ class GarageScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _exportFleet(BuildContext context) async {
+  Future<void> _exportFleetCsv(BuildContext context) async {
     final entries = <({Vehicle vehicle, VehicleStats stats})>[];
     for (final v in LocalRepository.allVehicles()) {
       final stats = LocalRepository.vehicleStats(v.id);
@@ -117,7 +118,7 @@ class GarageScreen extends ConsumerWidget {
     }
     if (entries.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nothing to export')),
+        const SnackBar(content: Text('No fill-ups to export as CSV')),
       );
       return;
     }
@@ -125,7 +126,9 @@ class GarageScreen extends ConsumerWidget {
     await shareCsv(csv, fleetExportFilename());
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Export ready')),
+        const SnackBar(
+          content: Text('CSV ready — save or share from the share sheet'),
+        ),
       );
     }
   }

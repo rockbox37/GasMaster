@@ -36,7 +36,8 @@ void main() {
     }
   });
 
-  testWidgets('empty garage More menu offers Import backup', (tester) async {
+  testWidgets('empty garage More menu offers Import backup without download icon',
+      (tester) async {
     await tester.pumpWidget(
       const ProviderScope(
         child: MaterialApp(home: GarageScreen()),
@@ -44,11 +45,15 @@ void main() {
     );
     await tester.pump();
 
+    // CSV/backup exports are labeled menu actions, not a mysterious AppBar icon.
+    expect(find.byIcon(Icons.file_download_outlined), findsNothing);
+
     await tester.tap(find.byTooltip('More'));
     await tester.pump();
 
     expect(find.text('Import backup'), findsOneWidget);
     expect(find.text('Export backup'), findsNothing);
+    expect(find.text('Export CSV'), findsNothing);
     expect(find.text('Fuel-Saving Tips'), findsOneWidget);
     expect(find.text('About'), findsOneWidget);
   });
