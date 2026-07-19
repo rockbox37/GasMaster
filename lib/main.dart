@@ -21,8 +21,8 @@ void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(VehicleAdapter());
   Hive.registerAdapter(FillUpAdapter());
-  await LocalRepository.bootstrap();
   await Preferences.init();
+  await LocalRepository.bootstrap();
 
   // Seed a backup if data exists but no snapshot yet (first launch after upgrade).
   await LocalRepository.persistNow();

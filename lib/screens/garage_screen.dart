@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../models/vehicle.dart';
 import '../services/local_repository.dart';
 import '../state/app_state.dart';
+import '../utils/backup_ui.dart';
 import '../utils/csv_export.dart';
 import '../utils/stats.dart';
 import '../widgets/gasmaster_brand.dart';
@@ -29,18 +30,34 @@ class GarageScreen extends ConsumerWidget {
           PopupMenuButton<String>(
             tooltip: 'More',
             onSelected: (value) {
-              if (value == 'fuel-saving-tips') {
+              if (value == 'export-backup') {
+                exportFleetBackup(context);
+              } else if (value == 'import-backup') {
+                importBackupFlow(
+                  context,
+                  onImported: () => ref.invalidate(unitSystemProvider),
+                );
+              } else if (value == 'fuel-saving-tips') {
                 context.push('/fuel-saving-tips');
               } else if (value == 'about') {
                 context.push('/about');
               }
             },
-            itemBuilder: (context) => const [
-              PopupMenuItem(
+            itemBuilder: (context) => [
+              if (vehicles.isNotEmpty)
+                const PopupMenuItem(
+                  value: 'export-backup',
+                  child: Text('Export backup'),
+                ),
+              const PopupMenuItem(
+                value: 'import-backup',
+                child: Text('Import backup'),
+              ),
+              const PopupMenuItem(
                 value: 'fuel-saving-tips',
                 child: Text('Fuel-Saving Tips'),
               ),
-              PopupMenuItem(
+              const PopupMenuItem(
                 value: 'about',
                 child: Text('About'),
               ),
