@@ -29,9 +29,17 @@ class GarageScreen extends ConsumerWidget {
           PopupMenuButton<String>(
             tooltip: 'More',
             onSelected: (value) {
-              if (value == 'about') context.push('/about');
+              if (value == 'fuel-saving-tips') {
+                context.push('/fuel-saving-tips');
+              } else if (value == 'about') {
+                context.push('/about');
+              }
             },
             itemBuilder: (context) => const [
+              PopupMenuItem(
+                value: 'fuel-saving-tips',
+                child: Text('Fuel-Saving Tips'),
+              ),
               PopupMenuItem(
                 value: 'about',
                 child: Text('About'),

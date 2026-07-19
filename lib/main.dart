@@ -9,6 +9,7 @@ import 'screens/garage_screen.dart';
 import 'screens/about_screen.dart';
 import 'screens/add_vehicle_screen.dart';
 import 'screens/add_fillup_screen.dart';
+import 'screens/fuel_saving_tips_screen.dart';
 import 'screens/vehicle_detail_screen.dart';
 import 'services/local_repository.dart';
 import 'services/preferences.dart';
@@ -37,6 +38,10 @@ final _router = GoRouter(
   routes: [
     GoRoute(path: '/', builder: (_, __) => const GarageScreen()),
     GoRoute(path: '/about', builder: (_, __) => const AboutScreen()),
+    GoRoute(
+      path: '/fuel-saving-tips',
+      builder: (_, __) => const FuelSavingTipsScreen(),
+    ),
     GoRoute(path: '/vehicle/add', builder: (_, __) => const AddVehicleScreen()),
     GoRoute(
       path: '/vehicle/:id',
