@@ -61,6 +61,12 @@ class LocalRepository {
     });
   }
 
+  /// Notifies vehicle and fill-up listeners (e.g. after a durable import).
+  static void notifyAllListeners() {
+    _notifyVehicleListeners();
+    _notifyFillUpListeners();
+  }
+
   static Future<void> _persistVehicles() async {
     await vehicleBox.flush();
     _scheduleBackup();

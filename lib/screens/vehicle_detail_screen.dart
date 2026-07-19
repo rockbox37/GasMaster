@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 import '../models/vehicle.dart';
 import '../services/local_repository.dart';
 import '../state/app_state.dart';
+import '../utils/backup_ui.dart';
 import '../utils/csv_export.dart';
 import '../utils/stats.dart';
 import '../widgets/gasmaster_brand.dart';
@@ -60,10 +61,25 @@ class VehicleDetailScreen extends ConsumerWidget {
               onPressed: () => _shareStats(context, vehicle.displayName, stats, isMetric),
               tooltip: 'Share summary',
             ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            onPressed: () => _deleteVehicle(context, vehicleId),
-            tooltip: 'Delete vehicle',
+          PopupMenuButton<String>(
+            tooltip: 'More',
+            onSelected: (value) {
+              if (value == 'export-backup') {
+                exportVehicleBackup(context, vehicle);
+              } else if (value == 'delete') {
+                _deleteVehicle(context, vehicleId);
+              }
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem(
+                value: 'export-backup',
+                child: Text('Export backup'),
+              ),
+              PopupMenuItem(
+                value: 'delete',
+                child: Text('Delete vehicle'),
+              ),
+            ],
           ),
         ],
       ),

@@ -25,6 +25,7 @@ dependencies:
   image_picker: ^1.2.2
   image: ^4.8.0
   package_info_plus: ^9.0.1
+  file_picker: ^11.0.2
   # Optional (uncomment after flutterfire configure)
   # firebase_core: ^3.6.0
   # firebase_auth: ^5.3.0
