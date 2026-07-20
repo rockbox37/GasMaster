@@ -9,6 +9,7 @@ import '../services/local_repository.dart';
 import '../state/app_state.dart';
 import '../utils/backup_ui.dart';
 import '../utils/csv_export.dart';
+import '../utils/share_origin.dart';
 import '../utils/stats.dart';
 import '../widgets/gasmaster_brand.dart';
 import '../widgets/vehicle_photo_picker.dart';
@@ -151,7 +152,7 @@ class VehicleDetailScreen extends ConsumerWidget {
       return;
     }
     final csv = generateFillUpsCsv([(vehicle: v, stats: stats)]);
-    await shareCsv(csv, vehicleExportFilename(v));
+    await shareCsv(context, csv, vehicleExportFilename(v));
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -182,7 +183,11 @@ class VehicleDetailScreen extends ConsumerWidget {
       msg.writeln('Cost: \$${costPerDist.toStringAsFixed(3)} per $distUnit');
     }
 
-    await Share.share(msg.toString(), subject: 'GasMaster — $name');
+    await Share.share(
+      msg.toString(),
+      subject: 'GasMaster — $name',
+      sharePositionOrigin: sharePositionOriginFor(context),
+    );
   }
 }
 

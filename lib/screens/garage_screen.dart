@@ -123,7 +123,7 @@ class GarageScreen extends ConsumerWidget {
       return;
     }
     final csv = generateFillUpsCsv(entries);
-    await shareCsv(csv, fleetExportFilename());
+    await shareCsv(context, csv, fleetExportFilename());
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
