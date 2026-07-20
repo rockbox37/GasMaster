@@ -18,6 +18,16 @@ class VehiclesNotifier extends Notifier<List<Vehicle>> {
   }
 }
 
+class CommunitySharingNotifier extends Notifier<bool> {
+  @override
+  bool build() => Preferences.communitySharingEnabled;
+
+  Future<void> set(bool enabled) async {
+    state = enabled;
+    await Preferences.setCommunitySharingEnabled(enabled);
+  }
+}
+
 final fillUpsProvider = NotifierProvider.family<FillUpsNotifier, List<FillUp>, String>(
   FillUpsNotifier.new,
 );
@@ -39,6 +49,10 @@ final statsProvider = Provider.family<VehicleStats, String>((ref, vehicleId) {
 
 final unitSystemProvider =
     NotifierProvider<UnitSystemNotifier, String>(UnitSystemNotifier.new);
+final communitySharingProvider =
+    NotifierProvider<CommunitySharingNotifier, bool>(
+  CommunitySharingNotifier.new,
+);
 
 class UnitSystemNotifier extends Notifier<String> {
   @override

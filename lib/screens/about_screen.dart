@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import '../state/app_state.dart';
 import '../widgets/gasmaster_brand.dart';
 
-class AboutScreen extends StatelessWidget {
+class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final sharingEnabled = ref.watch(communitySharingProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -51,6 +54,26 @@ class AboutScreen extends StatelessWidget {
                     ),
                   );
                 },
+              ),
+              const SizedBox(height: 28),
+              Card(
+                child: SwitchListTile(
+                  value: sharingEnabled,
+                  onChanged: (enabled) => ref
+                      .read(communitySharingProvider.notifier)
+                      .set(enabled),
+                  secondary: Icon(
+                    Icons.public_outlined,
+                    color: theme.colorScheme.primary,
+                  ),
+                  title: const Text('Share anonymous fuel economy'),
+                  subtitle: const Text(
+                    'If enabled, only year, make, model, and aggregate '
+                    'efficiency may be eligible for future community '
+                    'comparison. No raw fill-ups, IDs, dates, costs, or '
+                    'photos are included, and no data is uploaded yet.',
+                  ),
+                ),
               ),
               const SizedBox(height: 40),
               Icon(
