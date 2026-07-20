@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' show Rect;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
@@ -303,13 +304,18 @@ class BackupService {
   }
 
   /// Writes JSON to a temp file and opens the platform share sheet (Files, etc.).
-  static Future<void> shareBackupJson(String json, String filename) async {
+  static Future<void> shareBackupJson(
+    String json,
+    String filename, {
+    Rect? sharePositionOrigin,
+  }) async {
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/$filename');
     await file.writeAsString(json);
     await Share.shareXFiles(
       [XFile(file.path, mimeType: 'application/json', name: filename)],
       subject: filename,
+      sharePositionOrigin: sharePositionOrigin,
     );
   }
 

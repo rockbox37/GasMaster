@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../models/vehicle.dart';
+import 'share_origin.dart';
 import 'stats.dart';
 
 const _headers = [
@@ -75,12 +77,18 @@ String _filenameSlug(String name) {
 }
 
 /// Writes [csv] to a temp file and opens the platform share sheet.
-Future<void> shareCsv(String csv, String filename) async {
+Future<void> shareCsv(
+  BuildContext context,
+  String csv,
+  String filename,
+) async {
+  final origin = sharePositionOriginFor(context);
   final dir = await getTemporaryDirectory();
   final file = File('${dir.path}/$filename');
   await file.writeAsString(csv);
   await Share.shareXFiles(
     [XFile(file.path, mimeType: 'text/csv', name: filename)],
     subject: filename,
+    sharePositionOrigin: origin,
   );
 }

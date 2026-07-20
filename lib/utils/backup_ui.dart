@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/vehicle.dart';
 import '../services/backup_service.dart';
+import 'share_origin.dart';
 
 /// Photos are not packaged in v1 durable JSON backups.
 const kBackupPhotosDeferredNote =
@@ -35,7 +36,12 @@ Future<void> exportFleetBackup(BuildContext context) async {
   }
 
   final json = BackupService.encodePretty(data);
-  await BackupService.shareBackupJson(json, BackupService.fleetBackupFilename());
+  if (!context.mounted) return;
+  await BackupService.shareBackupJson(
+    json,
+    BackupService.fleetBackupFilename(),
+    sharePositionOrigin: sharePositionOriginFor(context),
+  );
   if (context.mounted) {
     _snack(
       context,
@@ -67,9 +73,11 @@ Future<void> exportVehicleBackup(BuildContext context, Vehicle vehicle) async {
   }
 
   final json = BackupService.encodePretty(data);
+  if (!context.mounted) return;
   await BackupService.shareBackupJson(
     json,
     BackupService.vehicleBackupFilename(vehicle),
+    sharePositionOrigin: sharePositionOriginFor(context),
   );
   if (context.mounted) {
     _snack(
