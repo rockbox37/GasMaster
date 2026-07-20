@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -17,6 +18,19 @@ Uint8List _jpeg({required int width, required int height, int quality = 95}) {
 }
 
 void main() {
+  late Directory tempDir;
+
+  setUp(() async {
+    tempDir = await Directory.systemTemp.createTemp('gasmaster_photo_');
+    VehiclePhotoService.documentsOverride = tempDir;
+  });
+
+  tearDown(() async {
+    VehiclePhotoService.documentsOverride = null;
+    if (tempDir.existsSync()) {
+      await tempDir.delete(recursive: true);
+    }
+  });
   group('VehiclePhotoService.optimizeBytes', () {
     test('downsizes large images and reports savings', () {
       final original = _jpeg(width: 3000, height: 2000, quality: 95);
@@ -39,5 +53,26 @@ void main() {
       expect(formatBytes(2048), contains('KB'));
       expect(formatBytes(2 * 1024 * 1024), contains('MB'));
     });
+  });
+
+  test('saves an optimized file and deletes it by relative path', () async {
+    final source = File('${tempDir.path}/source.jpg')
+      ..writeAsBytesSync(_jpeg(width: 300, height: 200));
+
+    final saved = await VehiclePhotoService.saveOptimized(
+      vehicleId: 'vehicle-1',
+      sourceFile: source,
+    );
+    final destination = File(
+      await VehiclePhotoService.absolutePath(saved.relativePath),
+    );
+
+    expect(saved.relativePath, 'vehicle_photos/vehicle-1.jpg');
+    expect(await destination.exists(), isTrue);
+    expect((await destination.readAsBytes()), saved.result.bytes);
+
+    await VehiclePhotoService.deletePhoto(saved.relativePath);
+
+    expect(await destination.exists(), isFalse);
   });
 }
