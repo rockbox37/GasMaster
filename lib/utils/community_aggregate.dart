@@ -80,5 +80,5 @@ class CommunityAggregate {
       };
 
   static String _normalizeLabel(String value) =>
-      value.trim().replaceAll(RegExp(r'\s+'), ' ');
+      value.trim().replaceAll(RegExp(r'\s+'), ' ').toLowerCase();
 }

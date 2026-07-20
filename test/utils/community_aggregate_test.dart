@@ -61,10 +61,17 @@ void main() {
     )!;
 
     expect(aggregate.year, 2020);
-    expect(aggregate.make, 'Honda');
-    expect(aggregate.model, 'Civic');
+    expect(aggregate.make, 'honda');
+    expect(aggregate.model, 'civic');
     expect(aggregate.sampleCount, 1);
     expect(aggregate.averageLPer100Km, closeTo(7.840486, 0.0001));
+
+    final alternateCasing = CommunityAggregate.fromStats(
+      vehicle: _vehicle(make: 'HONDA', model: 'CIVIC'),
+      stats: stats,
+    )!;
+    expect(alternateCasing.make, aggregate.make);
+    expect(alternateCasing.model, aggregate.model);
   });
 
   test('keeps metric efficiency in canonical units', () {
