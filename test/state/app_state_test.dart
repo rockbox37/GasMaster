@@ -22,4 +22,17 @@ void main() {
     expect(container.read(unitSystemProvider), 'metric');
     expect(Preferences.unitSystem, 'metric');
   });
+
+  test('communitySharingProvider is off by default and persists opt-in',
+      () async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    expect(container.read(communitySharingProvider), isFalse);
+
+    await container.read(communitySharingProvider.notifier).set(true);
+
+    expect(container.read(communitySharingProvider), isTrue);
+    expect(Preferences.communitySharingEnabled, isTrue);
+  });
 }
