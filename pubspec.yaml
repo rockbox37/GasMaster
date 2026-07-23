@@ -26,6 +26,10 @@ dependencies:
   image: ^4.8.0
   package_info_plus: ^9.0.1
   file_picker: ^11.0.2
+  flutter_local_notifications: ^18.0.1
+  timezone: ^0.9.4
+  flutter_timezone: ^3.0.1
+  app_badge_plus: ^1.2.2
   # Optional (uncomment after flutterfire configure)
   # firebase_core: ^3.6.0
   # firebase_auth: ^5.3.0

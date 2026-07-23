@@ -4,6 +4,7 @@ import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart';
 import '../models/vehicle.dart';
 import '../models/fillup.dart';
+import '../models/reminder.dart';
 import '../utils/stats.dart';
 import 'backup_service.dart';
 import 'vehicle_photo_service.dart';
@@ -134,6 +135,50 @@ class LocalRepository {
     await _persistVehicles();
     _notifyVehicleListeners();
     return saved.result;
+  }
+
+  /// Updates a single reminder on a vehicle. Only non-null parameters are
+  /// applied; pass [clearDueDate] to unset an existing due date.
+  static Future<void> updateReminder({
+    required String vehicleId,
+    required ReminderType type,
+    bool? doesNotApply,
+    DateTime? dueDate,
+    bool clearDueDate = false,
+    int? renewalPeriodMonths,
+    int? remindDaysPrior,
+  }) async {
+    final v = vehicleBox.get(vehicleId);
+    if (v == null) return;
+    final r = v.reminderFor(type);
+    if (doesNotApply != null) r.doesNotApply = doesNotApply;
+    if (clearDueDate) {
+      r.dueDate = null;
+    } else if (dueDate != null) {
+      r.dueDate = dueDate;
+    }
+    if (renewalPeriodMonths != null) r.renewalPeriodMonths = renewalPeriodMonths;
+    if (remindDaysPrior != null) r.remindDaysPrior = remindDaysPrior;
+    await v.save();
+    await _persistVehicles();
+    _notifyVehicleListeners();
+  }
+
+  /// Advances a reminder's due date by one renewal period (e.g. after the user
+  /// completes the renewal). No-op if the reminder has no due date.
+  static Future<void> renewReminder({
+    required String vehicleId,
+    required ReminderType type,
+  }) async {
+    final v = vehicleBox.get(vehicleId);
+    if (v == null) return;
+    final r = v.reminderFor(type);
+    final next = r.nextDueDateAfterRenewal();
+    if (next == null) return;
+    r.dueDate = next;
+    await v.save();
+    await _persistVehicles();
+    _notifyVehicleListeners();
   }
 
   static Future<void> clearVehiclePhoto(String vehicleId) async {

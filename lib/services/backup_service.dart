@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../models/fillup.dart';
+import '../models/reminder.dart';
 import '../models/vehicle.dart';
 import 'local_repository.dart';
 import 'preferences.dart';
@@ -95,7 +96,38 @@ class BackupService {
         'model': v.model,
         'trim': v.trim,
         'photoPath': v.photoPath,
+        'reminders': v.reminders.map(_reminderToJson).toList(),
       };
+
+  static Map<String, dynamic> _reminderToJson(VehicleReminder r) => {
+        'type': r.type.name,
+        'doesNotApply': r.doesNotApply,
+        'dueDate': r.dueDate?.toIso8601String(),
+        'renewalPeriodMonths': r.renewalPeriodMonths,
+        'remindDaysPrior': r.remindDaysPrior,
+      };
+
+  static List<VehicleReminder>? _remindersFromJson(dynamic raw) {
+    if (raw is! List) return null;
+    final result = <VehicleReminder>[];
+    for (final e in raw) {
+      if (e is! Map) continue;
+      final typeName = e['type'];
+      final match = ReminderType.values
+          .where((t) => t.name == typeName)
+          .toList();
+      if (match.isEmpty) continue;
+      final dueRaw = e['dueDate'];
+      result.add(VehicleReminder(
+        typeIndex: match.first.index,
+        doesNotApply: e['doesNotApply'] as bool? ?? false,
+        dueDate: dueRaw is String ? DateTime.tryParse(dueRaw) : null,
+        renewalPeriodMonths: (e['renewalPeriodMonths'] as num?)?.toInt() ?? 12,
+        remindDaysPrior: (e['remindDaysPrior'] as num?)?.toInt() ?? 30,
+      ));
+    }
+    return result;
+  }
 
   static Map<String, dynamic> _fillUpToJson(FillUp f) => {
         'id': f.id,
@@ -212,6 +244,7 @@ class BackupService {
         model: m['model'] as String? ?? '',
         trim: m['trim'] as String? ?? '',
         photoPath: m['photoPath'] as String?,
+        reminders: _remindersFromJson(m['reminders']),
       );
 
   static FillUp _fillUpFromJson(Map<String, dynamic> m) => FillUp(

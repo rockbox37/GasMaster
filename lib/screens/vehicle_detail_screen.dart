@@ -12,7 +12,9 @@ import '../utils/csv_export.dart';
 import '../utils/share_origin.dart';
 import '../utils/stats.dart';
 import '../widgets/gasmaster_brand.dart';
+import '../widgets/reminders_banner.dart';
 import '../widgets/vehicle_photo_picker.dart';
+import '../widgets/vehicle_reminders_section.dart';
 
 class VehicleDetailScreen extends ConsumerWidget {
   final String vehicleId;
@@ -95,12 +97,15 @@ class VehicleDetailScreen extends ConsumerWidget {
           ? ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                RemindersBanner(vehicleId: vehicleId),
                 _VehiclePhotoSection(vehicle: vehicle),
                 const SizedBox(height: 16),
                 _StatHeader(stats: stats, vehicleName: vehicle.displayName),
                 const SizedBox(height: 16),
                 _ConsumptionChart(stats: stats),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
+                VehicleRemindersSection(vehicle: vehicle),
+                const SizedBox(height: 24),
                 Text('Fill-ups', style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 8),
                 ...stats.rows.map((r) => _FillUpTile(
@@ -116,7 +121,10 @@ class VehicleDetailScreen extends ConsumerWidget {
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                RemindersBanner(vehicleId: vehicleId),
                 _VehiclePhotoSection(vehicle: vehicle),
+                const SizedBox(height: 24),
+                VehicleRemindersSection(vehicle: vehicle),
                 const SizedBox(height: 24),
                 _EmptyFillUps(
                   onAdd: () => context.push('/vehicle/$vehicleId/fillup/add'),
