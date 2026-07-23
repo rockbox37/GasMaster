@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gasmaster/models/fillup.dart';
+import 'package:gasmaster/models/reminder.dart';
 import 'package:gasmaster/models/vehicle.dart';
 import 'package:gasmaster/screens/garage_screen.dart';
 import 'package:gasmaster/services/backup_service.dart';
@@ -22,6 +23,9 @@ void main() {
     Hive.init(tempDir.path);
     if (!Hive.isAdapterRegistered(1)) Hive.registerAdapter(VehicleAdapter());
     if (!Hive.isAdapterRegistered(2)) Hive.registerAdapter(FillUpAdapter());
+    if (!Hive.isAdapterRegistered(3)) {
+      Hive.registerAdapter(VehicleReminderAdapter());
+    }
     await LocalRepository.bootstrap();
     await Preferences.init();
     await Hive.box<Vehicle>('vehicles').clear();

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/vehicle.dart';
 import '../models/fillup.dart';
+import '../models/reminder.dart';
 import '../services/local_repository.dart';
 import '../services/preferences.dart';
 import '../utils/stats.dart';
@@ -41,6 +42,37 @@ class FillUpsNotifier extends FamilyNotifier<List<FillUp>, String> {
     return LocalRepository.fillUpsFor(vehicleId);
   }
 }
+
+/// A reminder that currently needs the user's attention (in its remind window
+/// or overdue), paired with its owning vehicle.
+class DueReminder {
+  const DueReminder({
+    required this.vehicle,
+    required this.reminder,
+    required this.state,
+  });
+
+  final Vehicle vehicle;
+  final VehicleReminder reminder;
+  final ReminderState state;
+}
+
+/// All reminders across the fleet that are due-soon or overdue right now.
+/// Drives the in-app notification banner.
+final dueRemindersProvider = Provider<List<DueReminder>>((ref) {
+  final vehicles = ref.watch(vehiclesProvider);
+  final now = DateTime.now();
+  final out = <DueReminder>[];
+  for (final v in vehicles) {
+    for (final r in v.reminders) {
+      final s = r.stateAt(now);
+      if (s == ReminderState.dueSoon || s == ReminderState.overdue) {
+        out.add(DueReminder(vehicle: v, reminder: r, state: s));
+      }
+    }
+  }
+  return out;
+});
 
 final statsProvider = Provider.family<VehicleStats, String>((ref, vehicleId) {
   ref.watch(fillUpsProvider(vehicleId));

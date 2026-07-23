@@ -8,6 +8,7 @@ import '../utils/backup_ui.dart';
 import '../utils/csv_export.dart';
 import '../utils/stats.dart';
 import '../widgets/gasmaster_brand.dart';
+import '../widgets/reminders_banner.dart';
 import '../widgets/vehicle_avatar.dart';
 
 class GarageScreen extends ConsumerWidget {
@@ -79,12 +80,19 @@ class GarageScreen extends ConsumerWidget {
               fit: StackFit.expand,
               children: [
                 const GasMasterWatermark(),
-                ListView.separated(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  itemCount: vehicles.length,
-                  separatorBuilder: (_, __) =>
-                      const Divider(height: 1, indent: 72),
-                  itemBuilder: (_, i) {
+                Column(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
+                      child: RemindersBanner(),
+                    ),
+                    Expanded(
+                      child: ListView.separated(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        itemCount: vehicles.length,
+                        separatorBuilder: (_, __) =>
+                            const Divider(height: 1, indent: 72),
+                        itemBuilder: (_, i) {
                     final v = vehicles[i];
                     final stats = LocalRepository.vehicleStats(v.id);
                     return ListTile(
@@ -101,7 +109,10 @@ class GarageScreen extends ConsumerWidget {
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => context.push('/vehicle/${v.id}'),
                     );
-                  },
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

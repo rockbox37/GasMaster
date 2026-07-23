@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'models/vehicle.dart';
 import 'models/fillup.dart';
+import 'models/reminder.dart';
 import 'screens/garage_screen.dart';
 import 'screens/about_screen.dart';
 import 'screens/add_vehicle_screen.dart';
@@ -13,6 +14,7 @@ import 'screens/fuel_saving_tips_screen.dart';
 import 'screens/vehicle_detail_screen.dart';
 import 'services/local_repository.dart';
 import 'services/preferences.dart';
+import 'services/reminder_notification_service.dart';
 
 void main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -21,11 +23,21 @@ void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(VehicleAdapter());
   Hive.registerAdapter(FillUpAdapter());
+  Hive.registerAdapter(VehicleReminderAdapter());
   await Preferences.init();
   await LocalRepository.bootstrap();
 
   // Seed a backup if data exists but no snapshot yet (first launch after upgrade).
   await LocalRepository.persistNow();
+
+  // Keep OS notifications and the app-icon badge in sync with reminders.
+  // The listener fires on any vehicle change (incl. reminder edits/deletes).
+  await ReminderNotificationService.instance.init();
+  LocalRepository.addVehicleListener(() {
+    ReminderNotificationService.instance.syncAll(LocalRepository.allVehicles());
+  });
+  await ReminderNotificationService.instance
+      .syncAll(LocalRepository.allVehicles());
 
   runApp(const ProviderScope(child: GasMasterApp()));
 
