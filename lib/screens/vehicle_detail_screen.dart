@@ -95,7 +95,8 @@ class VehicleDetailScreen extends ConsumerWidget {
       ),
       body: hasFillUps
           ? ListView(
-              padding: const EdgeInsets.all(16),
+              // Extra bottom padding so the last card clears the Add Fill-up FAB.
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
               children: [
                 RemindersBanner(vehicleId: vehicleId),
                 _VehiclePhotoSection(vehicle: vehicle),
@@ -119,7 +120,8 @@ class VehicleDetailScreen extends ConsumerWidget {
               ],
             )
           : ListView(
-              padding: const EdgeInsets.all(16),
+              // Extra bottom padding so the last card clears the Add Fill-up FAB.
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
               children: [
                 RemindersBanner(vehicleId: vehicleId),
                 _VehiclePhotoSection(vehicle: vehicle),
